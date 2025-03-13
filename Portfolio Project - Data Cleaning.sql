@@ -3,10 +3,6 @@
 -- https://www.kaggle.com/datasets/swaptr/layoffs-2022
 
 
-
-
-
-
 SELECT * 
 FROM world_layoffs.layoffs;
 
@@ -165,12 +161,6 @@ SELECT `company`,
 DELETE FROM world_layoffs.layoffs_staging2
 WHERE row_num >= 2;
 
-
-
-
-
-
-
 -- 2. Standardize Data
 
 SELECT * 
@@ -283,17 +273,12 @@ SELECT *
 FROM world_layoffs.layoffs_staging2;
 
 
-
-
-
 -- 3. Look at Null Values
 
 -- the null values in total_laid_off, percentage_laid_off, and funds_raised_millions all look normal. I don't think I want to change that
 -- I like having them null because it makes it easier for calculations during the EDA phase
 
 -- so there isn't anything I want to change with the null values
-
-
 
 
 -- 4. remove any columns and rows we need to
