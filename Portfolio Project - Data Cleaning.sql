@@ -311,33 +311,3 @@ FROM world_layoffs.layoffs_staging2;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
