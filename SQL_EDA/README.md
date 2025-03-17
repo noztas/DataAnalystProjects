@@ -7,10 +7,6 @@ This project explores the **Layoffs Dataset (2022)** using SQL queries to uncove
 - **Source**: [Layoffs 2022 Dataset on Kaggle](https://www.kaggle.com/datasets/swaptr/layoffs-2022)
 - **Description**: This dataset tracks **tech layoffs from 2020-2022**, including company details, funding information, and industry trends.
 
-🔹 **Kaggle Credit**:  
-This dataset was originally published on **Kaggle** by **Swapnil Tirthakar**.  
-To access the full dataset, please download it directly from **Kaggle**.
-
 ## 🔍 Key SQL Analysis Performed
 ✔ **Total Layoffs Per Industry**  
 ✔ **Top 5 Companies with the Most Layoffs**  
