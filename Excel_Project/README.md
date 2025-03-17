@@ -12,7 +12,8 @@ The analysis includes **pivot tables, charts, and an interactive dashboard** to 
 
 ## 📂 Dataset
 - **File**: [`Bike_Sales_Analysis.xlsx`](./data/Bike_Sales_Analysis.xlsx)
-- **Source**: [Dataset Source or Kaggle Link](#)  
+- **Source**: [Excel Project Dataset by AlexTheAnalyst](https://github.com/AlexTheAnalyst/Excel-Tutorial/blob/main/Excel%20Project%20Dataset.xlsx)
+ 
 - **Description**: The dataset contains customer demographics, income levels, commuting distances, and purchase decisions.
 
 ---
