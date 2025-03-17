@@ -8,20 +8,16 @@ The goal is to improve **data quality** by removing duplicates, handling missing
 - **Source**: [Layoffs 2022 Dataset on Kaggle](https://www.kaggle.com/datasets/swaptr/layoffs-2022)
 - **Description**: This dataset provides information on **tech industry layoffs** from 2020-2022, including company names, industries, locations, and funding.
 
-🔹 **Kaggle Credit**:  
-This dataset was originally published on **Kaggle** by **Swapnil Tirthakar**.  
-If you want to use this dataset, please **download it directly from Kaggle**.
-
 ## 🔧 SQL Techniques Used
 ✔ **Removing Duplicates** – Used `ROW_NUMBER() OVER()` to find and delete duplicate records.  
-✔ **Standardizing Data** – Fixed inconsistent values in industry names, country names, and dates.  
+✔ **Standardizing Data** – Fixed inconsistent industry names, country names, and date values.  
 ✔ **Handling NULL Values** – Replaced missing data where possible.  
 ✔ **Date Formatting** – Converted string dates to proper `DATE` format using `STR_TO_DATE()`.  
 ✔ **Data Cleaning Automation** – Used `UPDATE`, `DELETE`, and `JOIN` operations to clean the data.  
 
 ## 📂 Project Files
 - **[`sql_scripts/data_cleaning.sql`](./sql_scripts/data_cleaning.sql)** – Full SQL script for data cleaning.
-- **[`data/layoffs_raw.csv`](./data/layoffs_raw.csv)** – Raw dataset (if available).
+- **[`data/layoffs_raw.csv`](./data/layoffs_raw.csv)** – Raw dataset 
 - **[`data/layoffs_cleaned.csv`](./data/layoffs_cleaned.csv)** – Cleaned dataset.
 
 ## 🛠 Tools Used
