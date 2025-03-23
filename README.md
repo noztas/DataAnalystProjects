@@ -12,8 +12,4 @@ Welcome to my Data Analyst Portfolio. This repository showcases various projects
 
 
 
-## 🚀 How to Use This Project
-Download the SQL script data_cleaning.sql
-Import the dataset into MySQL
-Run the SQL queries step-by-step
-Verify the cleaned data using SELECT queries
+
