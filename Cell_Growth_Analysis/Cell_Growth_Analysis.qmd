@@ -1,0 +1,439 @@
+---
+title: "Cell Growth Analysis"
+author: "Neslihan Oztas"
+lang: en
+format:
+  docx:
+    reference-doc: "docs/template1.docx"
+    toc: true
+    toc-depth: 3
+execute:
+  echo: false
+  warning: false
+fig-dpi: 150
+fig-width: 6
+fig-height: 4
+editor: visual
+---
+
+## 
+
+```{r}
+#|echo: false
+#Loading Required Packages
+pacman::p_load(conflicted,wrappedtools,car,nlme,broom,
+               multcomp,tidyverse,foreign,DescTools, ez,
+               ggbeeswarm,
+               lme4, nlme,merTools,
+               easystats, patchwork,here)
+conflicts_prefer(dplyr::select,
+                 dplyr::filter,
+                 modelbased::standardize)
+base_dir <- here::here()
+
+```
+
+## 
+
+```{r}
+#| echo: false
+#| results: "hide"
+
+# Loading the Dataset
+file_path <- here("Data/Zellbeads.sav")
+
+if (file.exists(file_path)) {
+  rawdata <- foreign::read.spss(file = file_path,
+                                use.value.labels = TRUE,
+                                to.data.frame = TRUE) |>
+    as_tibble() |>
+    select(-ZahlZellen) |>
+    rename(Growth = Wachstum, Treatment = Bedingung) |>
+    mutate(
+      Passage_F = factor(Passage),
+      Treatment = fct_recode(Treatment, Control = "Kontrolle")
+    )
+} else {
+  message("⚠️ Zellbeads.sav not found. Simulating a dataset...")
+
+  set.seed(123)
+  n <- 360
+
+  rawdata <- tibble(
+    Passage = rep(1:6, each = 60),
+    Treatment = rep(c("Control", "AngII", "Whatever"), times = 120),
+    Growth = rnorm(n, mean = 120, sd = 10) +
+             rep(c(0, 10, 20), times = 120) +
+             rep(rep(c(0, 2, 4, 6, 8, 10), each = 60), each = 1),
+    Passage_F = factor(rep(1:6, each = 60))
+  )
+}
+
+
+```
+
+## Exploratory Data Analysis (EDA)
+
+```{r}
+# Basic Scatter Plot
+ggplot(rawdata,aes(Passage,Growth))+
+  geom_point()+
+  geom_smooth(method=lm)
+
+# Improved Visualization with Customizations
+ggplot(rawdata,aes(Passage,Growth))+
+  geom_point()+
+  scale_x_continuous(breaks=seq(0,10,1))+
+  geom_smooth(linewidth=2)+
+  geom_smooth(method=lm,se=F,color='red')
+  
+
+
+```
+
+Shows rawdata trends using scatter plots. Adds regression lines (lm) to visualize trends. Growth appears to increase with Passage. A linear trend is visible, supporting the idea that passage influences cell growth.
+
+#### 
+
+## Regression Modelling
+
+This takes 2 steps, building the model and computing p-values.
+
+### Regression Model: Growth \~ Passage
+
+```{r}
+# Linear Model (Growth ~ Passage)
+(regressionOut<-lm(Growth~Passage,data=rawdata))
+# model and p.value for slope, not recommended
+
+# Model Summary
+tidy(regressionOut)
+cat("<br>\n\n")
+# computation of SSQs and p-values, use this!
+
+# ANOVA on Model
+(anova_out<-anova(regressionOut))
+anova_out$`Pr(>F)` #|> na.omit()
+tidy(anova_out)
+
+# summary(regressionOut)
+# str(regressionOut)
+
+```
+
+**Intercept (`120.834`)**: Growth when `Passage = 0`. **Passage Coefficient (`2.927`)**: Each additional passage increases Growth by \~2.93 units. **Highly Significant (`p = 1.26e-11`)**: Passage strongly affects Growth (`p < 0.001`).
+
+\newpage
+
+## Variance Adjustment
+
+### Variance Adjustment Using Residuals
+
+#To take out the variance due to Passage effects, we can use the residuals and shift them to the original mean:
+
+```{r}
+# Adjust Growth Values by Removing Passage Effects
+rawdata <-
+  mutate(rawdata,
+         growthAdj = regressionOut$residuals+mean(Growth))
+
+
+# Summary Statistics
+summarise(rawdata,
+          across(contains('growth'),
+                 ~meansd(.x,roundDig =4)))
+cat("<br>\n\n")
+
+# Visualization After Adjustment
+ggplot(rawdata,aes(Passage,growthAdj))+
+  geom_point()+
+  geom_smooth(method = 'lm')
+  cat("<br>\n\n")
+
+# Running ANOVA on Adjusted Growth
+lm(growthAdj~Passage,data=rawdata) |> anova() |> tidy()
+
+
+```
+
+Removes Passage effects using residuals (good approach for standardization). Adjusted growth (growthAdj) no longer depends on Passage (confirmed by ANOVA). ANOVA results (p = 1.00) indicate Passage is no longer significant after adjustment.
+
+\newpage
+
+### ANOVA with Categorical Passage
+
+```{r}
+(AnovaOut<-lm(Growth~Passage_F,data=rawdata))
+tidy(AnovaOut)
+cat("<br>\n\n")
+# summary(AnovaOut)
+(t <- anova(AnovaOut))
+t$`Pr(>F)`
+tidy(t)
+
+
+
+```
+
+The intercept value of **125.440** represents the mean Growth at **Passage_F1**, which serves as the reference level. Each coefficient for the other `Passage_F` levels indicates how much Growth differs compared to this baseline. For example, the coefficient for **Passage_F6** is **14.52**, meaning that at Passage 6, Growth is estimated to be **14.52 units higher** than at Passage 1. This difference is **highly significant** with a p-value of **9.03e-9**, suggesting that Growth increases significantly at higher passage numbers.
+
+\newpage
+
+### Interaction: Treatment \* Passage
+
+```{r}
+# Testing Interaction Between Passage and Treatment
+lmOut_interaction<-lm(Growth~Passage*Treatment,data=rawdata)
+
+# Perform Type-III ANOVA
+Anova(lmOut_interaction,type = 3)
+
+
+```
+
+Passage effect is significant (p = 1.98e-6) → Supports previous results. Treatment effect is also highly significant (p = 1.42e-10) → Suggests Treatment impacts Growth. Passage × Treatment interaction is **NOT significant** (p = 0.2389). This means the effect of Passage on Growth does **NOT** depend on Treatment.
+
+### Additive Model (No Interaction)
+
+```{r}
+# Additive Model (No Interaction)
+lmOut_additive<-lm(Growth~Passage+Treatment,data=rawdata)
+Anova_out <- Anova(lmOut_additive,type=2)
+Anova_out$`Pr(>F)`
+tidy(Anova_out)
+
+```
+
+Passage remains significant (p = 7.05e-17). Treatment remains significant (p = 4.01e-36). This model is better than the interaction model because Treatment and Passage independently affect Growth.
+
+### Univariable Model: Growth \~ Treatment
+
+```{r}
+# for comparison, here is the univariable model
+# without random effect
+lmOut_uni<-lm(Growth~Treatment,data=rawdata)
+aOut<-Anova(lmOut_uni,type=3)
+a_uni <- anova(lmOut_uni)
+a_uni$`Pr(>F)`
+
+```
+
+Treatment alone has a strong, significant effect on growth
+
+## Linear Mixed Models (LMM)
+
+### Model: Growth\~Treatment with Random Intercept for Passage
+
+```{r}
+# Growth is predicted by Treatment, with a random effect for Passage_F.
+lme_out <- nlme::lme(Growth~Treatment,data=rawdata,
+                     random=~1|Passage_F)
+Anova(lme_out)
+
+
+# The high Chi-square value (210.17) and the very low p-value (< 2.2e-16) indicate that Treatment has a highly significant effect on Growth.
+# The df = 2 shows that three treatment groups (including control) were compared.
+# The *** confirms that Treatment strongly influences Growth (p < 0.001).
+# By modeling Passage_F as a random effect, the model assumes individual passages have different baseline growth levels but share the same treatment effect.
+
+
+
+```
+
+Treatment significantly affects Growth (**p \< 0.001**). Passage is modeled as a random effect to account for baseline differences.
+
+### LMM with Treatment \* Passage (Full Model)
+
+```{r}
+# investigates how Treatment and Passage affect Growth, while accounting for variability between passages (Passage_F) as a random effect.
+lme_out <- nlme::lme(Growth~Treatment*Passage,data=rawdata,
+                     random=~1|Passage_F)
+Anova(lme_out, type=3)
+
+
+# Intercept (p < 2.2e-16) represents the estimated Growth at the reference levels (baseline values when Treatment and Passage are at their starting points).
+# Treatment significantly affects Growth, meaning different treatments lead to different growth outcomes.
+# Passage significantly affects Growth, confirming the trend observed in previous models.
+# The interaction effect (Treatment × Passage) is NOT significant (p = 0.2319).
+# This means the effect of Treatment on Growth does NOT change depending on Passage.
+```
+
+**Treatment** and **Passage** both have significant effects on Growth. The **interaction** between Treatment and Passage is **not significant.** This means their effects are **independent and additive.** The interaction model is **more complex**, but does **not improve the fit** over the simpler additive model.
+
+### Model Comparison with Maximum Likelihood
+
+```{r}
+lme_out <- nlme::lme(Growth~Treatment*Passage,data=rawdata,
+                     random=~1|Passage_F,
+                     method= 'ML') # Uses Maximum Likelihood (ML) estimation
+Anova(lme_out, type=3)
+
+
+#Passage and Treatment affect Growth independently. 
+#No significant interaction, meaning Passage effects do not depend on Treatment.
+```
+
+Use ML when comparing models (e.g., with or without interaction). Passage and Treatment affect Growth independently. No significant interaction, meaning Passage effects do not depend on Treatment.
+
+\newpage
+
+## Visualization: Growth by Treatment & Passage
+
+```{r}
+ggplot(rawdata, aes(x=Passage_F, y=Growth, color=Treatment))+
+  geom_boxplot()
+  
+
+# Passage Significantly Affects Growth → Growth generally increases as Passage increases.
+# Treatment Has a Strong Effect → "Whatever" increases Growth the most, followed by AngII, with Control being the lowest.
+# Variability Exists at Higher Passages → Some Passages (e.g., 3, 5, 6) show wider Growth distributions.
+# Outliers Suggest Special Cases → Some samples respond exceptionally well to treatments.
+```
+
+Growth increases with Passage. Treatment groups show consistent differences across passages. Some passages (e.g., 3, 5, 6) show higher variability.
+
+### LMM Using `lme4::lmer`
+
+```{r}
+lmer_out <- lme4::lmer(Growth~Treatment+
+                          (1|Passage_F),
+                           data=rawdata)
+Anova(lmer_out)
+(lmer_out_param <- model_parameters(lmer_out,
+                                     group_level = T))
+
+
+
+
+# Intercept (120.92) → Represents Growth in the Control group.
+# AngII treatment (+10.41 units) significantly increases Growth compared to Control (p < 0.001).
+# Whatever treatment (+20.05 units) increases Growth even more than AngII (p < 0.001).
+# Both treatments have a strong positive effect on Growth.
+# Random effects;
+# The random effect accounts for variability between passages (Passage_F).
+# Passages 1 & 2 have lower-than-average Growth (-5.32 and -6.70).
+# Passage 6 has higher-than-average Growth (+8.38).
+# This confirms that Passage introduces variability, but Treatment is still the dominant effect.
+```
+
+"Whatever" treatment increases growth the most, followed by "AngII". Random effects show substantial variability between passages. Fixed effects are highly significant.
+
+```{r}
+# Random Intercepts: Mixed Model
+# We first fit a linear mixed-effects model with a random intercept for each passage (Passage_F), assuming that the treatment effect is fixed across all groups.
+
+# The random intercept model lets each passage group start from a different average Growth level, but assumes that all groups react to the treatment in the same way. The random slope model, on the other hand, allows both the starting point and the treatment response to be different for each group. This is more realistic in experiments where not all groups respond to treatment the same way. Even though the slope model is a bit more complex, it does a better job showing the real variation we see in the data.
+
+
+lmer_out <- lme4::lmer(Growth ~ Treatment + (1 | Passage_F),
+                       data = rawdata)
+
+#Anova(lmer_out)
+#(lmer_out_param <- model_parameters(lmer_out, group_level = TRUE))
+
+# This model allows each passage to have a different baseline Growth level, but assumes the treatment effect is the same for all. It captures group-level variation without adding complexity in treatment response.
+```
+
+### Visualizing Random Intercepts with Fixed Slopes
+
+```{r}
+# Extract coefficients
+intercept_all <- lmer_out_param$Coefficient[1]
+slope_Ang <- lmer_out_param$Coefficient[2]
+slope_What <- lmer_out_param$Coefficient[3]
+
+plotdata <- tibble(
+  Passage_F = lmer_out_param$Level[-(1:3)],
+  intercept = lmer_out_param$Coefficient[-(1:3)] + intercept_all
+)
+
+# Plot: AngII vs Control
+p1 <- rawdata |>
+  filter(Treatment != "Whatever") |>
+  mutate(Treatment_n = case_match(Treatment, "Control" ~ 0, .default = 1)) |>
+  ggplot(aes(Treatment_n, Growth, color = Passage_F)) +
+  geom_beeswarm(alpha = 0.2, dodge.width = 0.2) +
+  geom_abline(data = plotdata, aes(intercept = intercept, slope = slope_Ang, color = Passage_F)) +
+  geom_abline(intercept = intercept_all, slope = slope_Ang, color = "black") +
+  scale_x_continuous(breaks = 0:1, limits = c(-0.5, 1.5), labels = c("Control", "AngII")) +
+  labs(title = "Random Intercepts Only (AngII vs Control)", x = "Treatment", y = "Growth")
+
+
+# Plot: Whatever vs Control
+p2 <- rawdata |>
+  filter(Treatment != "AngII") |>
+  mutate(Treatment_n = case_match(Treatment, "Control" ~ 0, .default = 1)) |>
+  ggplot(aes(Treatment_n, Growth, color = Passage_F)) +
+  geom_beeswarm(alpha = 0.2, dodge.width = 0.2) +
+  geom_abline(data = plotdata, aes(intercept = intercept, slope = slope_What, color = Passage_F)) +
+  geom_abline(intercept = intercept_all, slope = slope_What, color = "black") +
+  scale_x_continuous(breaks = 0:1, limits = c(-0.5, 1.5), labels = c("Control", "Whatever")) +
+  labs(title = "Random Intercepts Only (Whatever vs Control)", x = "Treatment", y = "Growth")
+
+
+# Combine plots
+p1 / p2
+```
+
+Each line represents a `Passage_F` group. They start at different intercepts (heights), but the treatment slopes are the same. This assumes all groups respond equally to treatment — which might be too simple.
+
+### Random Slopes: Mixed Model
+
+Now we extend the model to also include **random slopes**. This allows both the **intercept** and the **treatment effect** to vary for each passage.
+
+Model: lme4::lmer(Growth \~ Treatment + (1 + Treatment \| Passage_F), data = rawdata, REML = FALSE)
+
+```{r}
+lmer_out2 <- lme4::lmer(Growth ~ Treatment + (1 + Treatment | Passage_F),
+                        data = rawdata, REML = FALSE)
+
+Anova(lmer_out2)
+(lmer_out_param2 <- model_parameters(lmer_out2, group_level = TRUE))
+
+# The model now allows each passage to respond differently to treatment. Some passages may be more or less sensitive, and this structure captures that variability more realistically.
+```
+
+#### Visualizing Random Slopes by Passage
+
+```{r}
+# Extract fixed and random parts
+intercept_all <- lmer_out_param2$Coefficient[1]
+slope_Ang <- lmer_out_param2$Coefficient[2]
+slope_What <- lmer_out_param2$Coefficient[3]
+
+interceptdata <- tibble(
+  Passage_F = lmer_out_param2$Level[4:9],
+  intercept = lmer_out_param2$Coefficient[4:9] + intercept_all,
+  slopeAng = lmer_out_param2$Coefficient[10:15] + slope_Ang,
+  slopeWhat = lmer_out_param2$Coefficient[16:21] + slope_What
+)
+
+# Plot: AngII vs Control
+p1 <- rawdata |>
+  filter(Treatment != "Whatever") |>
+  mutate(Treatment_n = case_match(Treatment, "Control" ~ 0, .default = 1)) |>
+  ggplot(aes(Treatment_n, Growth, color = Passage_F)) +
+  geom_beeswarm(alpha = 0.2, dodge.width = 0.2) +
+  geom_abline(data = interceptdata, aes(intercept = intercept, slope = slopeAng, color = Passage_F)) +
+  geom_abline(intercept = intercept_all, slope = slope_Ang, color = "black") +
+  scale_x_continuous(breaks = 0:1, limits = c(-0.5, 1.5), labels = c("Control", "AngII")) +
+  labs(title = "Random Slopes (AngII vs Control)", x = "Treatment", y = "Growth")
+
+
+# Plot: Whatever vs Control
+p2 <- rawdata |>
+  filter(Treatment != "AngII") |>
+  mutate(Treatment_n = case_match(Treatment, "Control" ~ 0, .default = 1)) |>
+  ggplot(aes(Treatment_n, Growth, color = Passage_F)) +
+  geom_beeswarm(alpha = 0.2, dodge.width = 0.2) +
+  geom_abline(data = interceptdata, aes(intercept = intercept, slope = slopeWhat, color = Passage_F)) +
+  geom_abline(intercept = intercept_all, slope = slope_What, color = "black") +
+  scale_x_continuous(breaks = 0:1, limits = c(-0.5, 1.5), labels = c("Control", "Whatever")) +
+  labs(title = "Random Slopes (Whatever vs Control)", x = "Treatment", y = "Growth")
+
+
+# Combine plots
+p1 / p2
+```
+
+Now both intercepts and slopes vary across passages. Some passages react more strongly or weakly to treatment. This model reflects **real biological variability** much better than the intercept-only version.
