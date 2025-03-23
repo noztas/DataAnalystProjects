@@ -4,7 +4,7 @@ This project is part of a portfolio of hands-on training completed during the **
 
 ---
 
-## 🔬 Project Overview
+## Project Overview
 
 The aim of this project is to analyze the effects of **treatment** and **passage** on cell growth, using a dataset from a controlled biological experiment. The analysis demonstrates the use of:
 
@@ -24,14 +24,14 @@ Cell_Growth_Analysis.docx – Word document generated from the Quarto script.
 
 ---
 
-## ⚠️ Dataset Notice
+## Dataset Notice
 
 The original dataset (`Zellbeads.sav`) is not included in this repo due to privacy.  
 However, the Quarto script automatically **simulates a realistic dataset** if the original is missing — ensuring full reproducibility without data disclosure.
 
 ---
 
-## 🧪 Topics Covered
+## Topics Covered
 
 - **EDA:** Exploring the relationship between passage and cell growth  
 - **Linear modeling:** Understanding how cell growth changes with treatment and passage  
