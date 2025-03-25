@@ -1,0 +1,406 @@
+---
+title: "Mushroom Classification Analysis"
+format: 
+  docx:
+    reference-doc: "docs/template1.docx"
+    toc: true
+    toc-depth: 3
+editor: visual
+execute: 
+  echo: false
+  warning: false
+  output: asis
+fig-dpi: 300
+fig-width: 6
+fig-height: 8
+tbl-cap-location: top
+---
+
+## 
+
+```{r}
+#| echo: false
+# Packages
+pacman::p_load(conflicted, wrappedtools, tidyverse, 
+               broom, janitor, flextable,here,
+               ggbeeswarm, ggsignif, GGally,
+               car, pROC,
+               rlist)
+conflicts_prefer(dplyr::filter,
+                stats::fisher.test)
+```
+
+# Load and Inspect Dataset
+
+## Overview
+
+This project explores a dataset of mushrooms, classifying whether they are **edible or poisonous** based on their physical characteristics. We use **logistic regression** and **exploratory data analysis** to model the relationship between mushroom features and toxicity.
+
+The dataset was originally sourced from [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Mushroom) and contains **categorical variables** only.
+
+Note: All features are categorical. The target variable is `class` — whether the mushroom is **edible (e)** or **poisonous (p)**.
+
+```{r}
+#| echo: false
+#| results: "hide"
+# Import and clean the data
+rawdata <- read_csv(here("data/mushrooms.csv")) |>
+  mutate(
+    class=factor(class, levels=c("e","p"),
+                 labels=c("edible","poisonous")),
+    `cap-shape`=str_replace_all(`cap-shape`,
+                                c("bell"="b", "conical"="c", "convex"="x",
+                                  "flat"="f", "sunken"="s",
+                                  "spherical"= "p", "others"= "o")),
+    `cap-surface`=str_replace_all(`cap-surface`,
+                                  c("fibrous"="i", "grooves"="g",
+                                    "scaly"= "y", "smooth"="s",
+                                    "shiny"="h", "leathery"= "l",
+                                    "silky"= "k", "sticky"="t",
+                                    "wrinkled"="w", "fleshy"="e")),
+    across(where(is.logical),
+           ~factor(.x,levels=c(TRUE,FALSE),labels=c("yes","no"))),
+    across(where(is.character),~factor(.x)|>
+             fct_lump(prop = .1) |> 
+             fct_infreq()) )
+
+# gill-attachment
+# How gills are attached to the stem, where: adnate (a) adnexed (x) decurrent (d) free (e) sinuate (s) pores (p) none (f) unknown (?)
+# gill-spacing
+# Spacing between gills, where: close (c) distant (d) none (f)
+# stem-root
+# Structure of the stem's root, where: bulbous (b) swollen (s) club (c) cup (u) equal (e) rhizomorphs (z) rooted (r)
+# veil-type
+# Type of veil covering the gills, where: partial (p) universal (u)
+# ring-type
+# Type of ring present, where: cobwebby (c) evanescent (e) flaring (r) grooved (g) large (l) pendant (p) sheathing (s) zone (z) scaly (y) movable (m) none (f) unknown (?)
+# habitat
+# Environment where the mushroom is found, where: grasses (g) leaves (l) meadows (m) paths (p) heaths (h) urban (u) waste (w) woods (d)
+# season
+# Season when the mushroom is commonly observed, where: spring (s) summer (u) autumn (a) winter (w))
+```
+
+# Filter and Prepare Data
+
+```{r}
+#| echo: false
+# janitor::remove_empty(rawdata,which = "cols")
+rawdata <- janitor::remove_constant(rawdata,na.rm = T,quiet = F)
+# count NAs
+cat("Number of valid cases\n\n")
+rawdata |>
+  group_by(class) |>
+  summarize(across(
+    everything(),
+    .fns=~complete.cases(.x) |> sum())) |>
+  pivot_longer(-class) |>
+  pivot_wider(names_from = class,values_from = value) |>
+  arrange(edible,poisonous) |> 
+  flextable() |> 
+  set_table_properties(width=1, layout="autofit")
+cat("<br>\n\n")
+rawdata <-
+  rawdata |>
+  select(
+    -where(~sum(!is.na(.x))<50000),
+    -contains("ring")) |>
+  drop_na()
+
+cat(cn())
+cat("<br>\n\n")
+predvars <- ColSeeker(exclude = c("class"))
+
+```
+
+# Univariable Logistic Regression
+
+Each predictor variable is individually tested to assess its relationship with the outcome variable, `class` (edible vs. poisonous), using logistic regression.
+
+In this section, we:
+
+-   Use **boxplots** for numeric variables and **stacked bar charts** for categorical variables to visually compare distributions across classes.
+
+-   Fit a **univariable logistic regression** model for each feature.
+
+-   Apply **Fisher’s exact test** to categorical predictors to evaluate their association with `class`.
+
+-   Perform **Type II ANOVA** on each logistic regression model to test for overall predictor significance.
+
+-   Format and display results using clean summary tables.
+
+```{r}
+#| fig-height: 3
+#| fig-width: 5
+# Initialize storage lists
+model_list <- Anova_list <- list()
+# Loop through all predictor variables
+for(predvar_i in predvars$names){
+  cat(paste("###",predvar_i,"\n\n")) # Section header for each variable
+  if(is.numeric(rawdata[[predvar_i]])){ # If predictor is numeric → plot boxplot with significance
+    plottmp <-
+      ggplot(rawdata,aes(class,.data[[predvar_i]]))+
+      geom_boxplot(outlier.alpha = 0.25)+
+      geom_signif(comparisons = list(c(1,2)))+
+      scale_y_continuous(expand = expansion(mult=.1))
+    print(plottmp)
+  } else {# If predictor is categorical → stacked proportion bar plot
+    fisher_out=fisher.test(rawdata$class,
+                           rawdata[[predvar_i]],
+                           simulate.p.value = T)
+    plottmp <-
+      rawdata |>
+      drop_na(all_of(predvar_i)) |>
+      ggplot(aes(class,fill=.data[[predvar_i]]))+
+      geom_bar(position="fill")#+
+    # geom_signif(comparisons = list(c(1,2)),
+    #             annotations = formatP(fisher_out$p.value),
+    #             y_position=1.1, aes(group=.data[[predvar_i]]))+
+    # scale_y_continuous(expand = expansion(mult=.1))
+    print(plottmp)
+  }
+  # Univariable logistic regression
+  glm_out <- glm(paste("class ~", bt(predvar_i)),
+                 data = rawdata,
+                 family = binomial)
+  Anova_out <- Anova(glm_out) |> # Extract Type II ANOVA results
+    broom::tidy() |>
+    mutate(p.value=formatP(p.value))
+  Anova_list=list.append(Anova_list,Anova_out)
+  names(Anova_list)[[length(Anova_list)]] <-
+    paste0(predvar_i,': Anova')
+  sum_out <- broom::tidy(glm_out) |>  # Extract model summary (coefficients)
+    mutate(p.value=formatP(p.value))
+  model_list=list.append(model_list,sum_out)
+  names(model_list)[[length(model_list)]] <-
+    paste0(predvar_i,': sum')
+  Anova_out |> 
+    flextable()|> 
+  set_table_properties(width=1, layout="autofit") |> 
+    flex2rmd()
+  cat("<br>\n\n")
+}
+#print(model_list)
+
+```
+
+We assessed each variable's association with the `class` outcome using univariable logistic regression.
+
+-   **Cap diameter, cap shape, cap color, gill attachment, stem height, and stem width** were found to be **highly significant** predictors of edibility.
+
+-   **`does-bruise-or-bleed`** was **not statistically significant** (*p* = 0.623), suggesting it may not be a strong predictor when considered on its own.
+
+These findings guided the selection of variables for the multivariable logistic regression model.
+
+# Multivariable Logistic Regression (Full Model)
+
+## Exploration of Collinearity
+
+Before fitting the full multivariable model, we explored potential **collinearity** between numeric predictors using pairwise plots.
+
+```{r}
+textsize <- 7
+ggpairs(rawdata |>
+          select(class,`cap-diameter`,`stem-height`,`stem-width`),
+        aes(color=class, alpha=.1),
+   upper = list(continuous = wrap("cor", 
+                                  method = "spearman", 
+                                  size = 3, face="bold"))) +
+  theme_bw(base_size=5)+
+  theme(axis.title = element_text(face = "bold",size=textsize),
+        axis.text = element_text(face = "bold",size=textsize),
+        strip.text = element_text(face = "bold",size=textsize))
+cat("<br>\n\n")
+```
+
+**Stem width** and **cap diameter** show strong positive correlation (*r* ≈ 0.84), especially for edible mushrooms. **Cap diameter** and **stem height** are also moderately correlated (*r* ≈ 0.58). Correlations are slightly stronger within each class, especially among edible mushrooms.
+
+These relationships suggest some level of multicollinearity, which we account for during model fitting.
+
+<!-- \newpage -->
+
+```{r}
+testdata <- rawdata #|>
+  # slice_sample(n=500)
+
+glm_out <- glm(paste("class ~",
+                     paste(bt(predvars$names),
+                           collapse="+")) |>
+                 as.formula(),
+               data = testdata,
+               family = binomial)
+Anova_out <- Anova(glm_out) |>
+  broom::tidy() |>
+  mutate(p.value=formatP(p.value))
+sum_out <- broom::tidy(glm_out) |>
+  mutate(p.value=formatP(p.value))
+
+# Converts model coefficients (log-odds) into odds ratios using exp().
+ORs <- exp(glm_out$coefficients)
+# computes 95% confidence intervals for those odds ratios.
+CIs <- exp(confint(glm_out))
+
+OR_plotdata <- tibble(
+  Predictor=names(ORs)[-1] |> # make names nicer
+    str_replace('_',' ') |>
+    str_replace_all(c(
+      '^\\`'='',
+      '\\`(.)'=': \\1',
+      '\\`'='',
+      '(\\w)Other'='\\1: Other',
+      '(season)(\\w)'='\\1: \\2')) |>
+    str_to_title(),
+  OR=ORs[-1], # Removes the intercept ([-1]) so only predictors are shown.
+  CI_low=CIs[-1,1],
+  CI_high=CIs[-1,2],
+  p=sum_out$p.value[-1],
+  Significance=markSign(p),
+  Label=paste(Predictor,Significance))
+OR_plotdata |> 
+  select(Label,2:4) |> 
+  flextable() |>
+  set_table_properties(width=1, layout="autofit")
+```
+
+# create forest plot
+
+To visualize the final logistic regression results, we created a **forest plot** showing the **odds ratios (ORs)** and **95% confidence intervals** for each predictor. Each line represents a predictor (or level) from the model. The **dot** shows the estimated OR, while the **line** represents the confidence interval. A **dashed line at OR = 1** represents the null effect — values crossing this line indicate non-significant predictors. The Y-axis is shown on a **log scale**, which is standard for odds ratios. This plot makes it easy to visually identify which variables significantly **increase** or **decrease** the odds of a mushroom being poisonous.
+
+```{r}
+
+baseplot <- ggplot(OR_plotdata,
+                   aes(x = Label,y=OR))+
+  geom_pointrange(aes(ymin=CI_low,
+                      ymax=CI_high))+
+  geom_hline(yintercept = 1,linewidth=.2,linetype=2)+
+  coord_flip()
+# baseplot
+baseplot+
+  scale_y_log10(
+    breaks=logrange_12357,
+    minor_breaks=logrange_123456789
+  )+
+  # geom_text(aes(label=Significance),
+  #           vjust=1.5,color='red')+
+  ggtitle('OddsRatios shown on log-scale')+
+  xlab(NULL)#+
+cat("<br>\n\n")
+# theme_light()
+# theme(panel.grid.major = element_line(color='black'),
+#       panel.grid.minor = element_line(color='darkred'))#+
+# ggrepel::geom_label_repel(aes(label=Significance))
+
+```
+
+**Cap diameter, stem width, and stem height** are highly significant predictors (**p \< 0.001**) with ORs far from 1, indicating strong associations with mushroom edibility. Several levels of **stem color, cap color, gill color, and gill attachment** also show strong effects. For example:
+
+**Stem-Color: Y**, **Cap-Color: W**, and **Gill-Color: W** are strongly associated with higher or lower odds of being poisonous. **Does-Bruise-Or-Bleed: No** and **Cap-Shape: S** are not statistically significant (indicated by “n.s.”), as their confidence intervals include 1. A **logarithmic scale** is used on the X-axis to represent the multiplicative nature of odds ratios. Values **to the right of 1** suggest increased odds of being poisonous, while **values below 1** suggest decreased odds. Confidence intervals that **do not cross 1** represent statistically significant predictors.
+
+This visualization highlights which mushroom characteristics most influence the probability of being poisonous, after adjusting for all other variables in the model. These results offer valuable insight for feature selection, risk interpretation, and biological relevance.
+
+\newpage
+
+# Model Evaluation: ROC Curve and Classification Quality
+
+After building the multivariable logistic regression model, we assess its **predictive performance** using the **ROC curve** and classification plots based on the predicted probabilities (`p_poison`).
+
+```{r}
+#| fig-height: 4
+#| fig-width: 6
+testdata$p_poison <- predict(glm_out,
+                        type = 'response') #predict probability
+
+# run ROC for cutoff
+#pROC
+roc_out <- roc(
+  response=testdata$class,
+  predictor=testdata$p_poison
+)
+youden <- pROC::coords(roc_out,x='best',best.method='youden')
+youden |> 
+  pivot_longer(everything(),
+               names_to="Variable") |> 
+  flextable()|> 
+  set_table_properties(width=.5, layout="autofit")
+cat("<br>\n\n")
+ggroc(roc_out,legacy.axes = T)+
+  geom_abline(slope = 1,intercept = 0)+
+  geom_point(x=1-youden$specificity,
+             y=youden$sensitivity,
+             color='red',
+             size=2
+  )
+
+```
+
+The **ROC curve** (Receiver Operating Characteristic) shows how well the model distinguishes between edible and poisonous mushrooms.
+
+The **red dot** marks the **Youden’s optimal threshold (≈ 0.56)**, which balances **sensitivity** (true positive rate) and **specificity** (true negative rate). This threshold will be used to classify a mushroom as poisonous or edible based on its predicted probability.
+
+**Youden's optimal threshold = 0.56**
+
+**Sensitivity = 0.66** → \~66% of poisonous mushrooms were correctly identified.
+
+**Specificity = 0.73** → \~73% of edible mushrooms were correctly identified.
+
+```{r}
+#| fig-height: 4
+#| fig-width: 6
+# plot predictions
+testdata |>
+  mutate(`prediction quality`=case_when(
+    class=="poisonous" & p_poison<youden$threshold ~ "wrong but no danger",
+    class=="edible" & p_poison>=youden$threshold ~ "dangerously wrong",
+    .default = 'correct'
+  )) |>
+  ggplot(aes(class,p_poison))+
+  geom_boxplot(outlier.alpha = 0)+
+  scale_y_continuous(breaks=seq(0,1,.1))+
+  ggbeeswarm::geom_beeswarm(alpha=.15, size=.5,cex=.25,
+                            aes(color=`prediction quality`))+
+  scale_color_manual(values=c("seagreen","firebrick","magenta"))+
+  geom_hline(yintercept = c(youden$threshold),
+             color='red',
+             linetype=2)+
+  annotate(geom = "label",
+           x = 1.5,y=youden$threshold,
+           label=paste("Youden-cutoff:",roundR(youden$threshold)),
+           hjust=0.5,vjust=0.25)+
+  guides(color = guide_legend(override.aes=list(size = 3, 
+                                                alpha = 0.7)))+
+  theme(legend.position = 'bottom')
+```
+
+The violin/boxplot shows the distribution of predicted probabilities for each class:
+
+Most **poisonous** mushrooms have high predicted probabilities (green = correct).
+
+Most **edible** mushrooms have lower predicted probabilities (also green = correct).
+
+**"Dangerously wrong"** predictions (edible predicted as poisonous or vice versa) are color-coded:
+
+**Red** = edible predicted as poisonous (false positive → not dangerous).
+
+**Magenta** = poisonous predicted as edible (false negative → dangerous).
+
+This helps visualize the **model’s misclassification risk**.
+
+```{r}
+#| fig-height: 4
+#| fig-width: 6
+testdata |>
+  mutate(`prediction quality`=case_when(
+    class=="poisonous" & p_poison<youden$threshold ~ "dangerously wrong",
+    class=="edible" & p_poison>=youden$threshold ~ "wrong but no danger",
+    .default = 'correct'
+  )) |>
+  ggplot(aes(fill=`prediction quality`,x=p_poison))+
+  geom_histogram(position="dodge")+
+  scale_fill_manual(values=c("seagreen","firebrick","magenta"))+
+  facet_grid(rows=vars(class))
+```
+
+The histogram breaks down how predictions are distributed across the probability range.
+
+Green bars show correct predictions, while red and magenta indicate different types of errors.
+
+it can be quickly identifyed **problematic prediction regions** near the cutoff (e.g. 0.5–0.6).
