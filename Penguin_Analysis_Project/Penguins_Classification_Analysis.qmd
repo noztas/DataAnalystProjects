@@ -1,0 +1,419 @@
+---
+title: "Penguin Classification Project"
+format: 
+  docx:
+    reference-doc: "docs/template1.docx"
+    toc: true
+    toc-depth: 3
+editor: visual
+execute: 
+  echo: false
+  warning: false
+  output: asis
+fig-dpi: 150
+fig-width: 6
+fig-height: 4
+tbl-cap-location: top
+---
+
+```{r}
+#| echo: false
+
+pacman::p_load(conflicted,tidyverse,wrappedtools,
+               palmerpenguins, rlist, flextable,
+               patchwork, car, multcomp, ggsignif,
+               broom, leaps, pROC, rpart, ggbeeswarm,
+               nlme, merTools, easystats, rpart.plot)
+conflicts_prefer(dplyr::filter, dplyr::select)
+set_flextable_defaults(big.mark = " ", 
+                       font.size = 9, 
+                       theme_fun = theme_vanilla,
+                       padding.bottom = 1, 
+                       padding.top = 3,
+                       padding.left = 3,
+                       padding.right = 4
+)
+```
+
+```{r}
+#| echo: false
+rawdata <- penguins |>
+  filter(!is.na(sex)) |>
+  mutate(year=factor(year))
+```
+
+## Exploratory Data Analysis (EDA)
+
+This project analyzes the Palmer Penguins dataset to explore morphological traits by species and sex, assess the normality of variables, and build models to predict penguin sex based on physical features. The project showcases end-to-end exploratory and statistical modeling skills in R using tidyverse principles.
+
+Let’s first look at how **morphological features** differ between species and sexes.
+
+```{r}
+#| echo: false
+ggplot(penguins,aes(x = `body_mass_g`))+
+  geom_density()
+# This plot shows the overall distribution of body mass for all penguins in the dataset, regardless of species or sex. The distribution is unimodal but slightly skewed, indicating that most penguins fall around a central body mass (~3750–4500g), with a tail toward heavier individuals.
+
+penguins |>
+filter(!is.na(sex)) |>
+ggplot(aes(x = `body_mass_g`,fill=`sex`))+
+  geom_density(alpha=.4)
+# This density plot shows a clear separation between male and female penguins, with males having a higher average body mass. The overlap is relatively small, implying that body mass could be a good predictor for sex classification. This supports the presence of sexual dimorphism in penguin species.
+
+penguins |>
+  filter(!is.na(sex)) |>
+  ggplot(aes(x =body_mass_g, color= species, fill = species))+
+  facet_grid(rows = vars(species), cols = vars(sex),
+             scale= "fixed",
+             margins = FALSE) +
+  labs(title= "Weight Distribution", x= "Body Mass [g]")+
+  geom_density(alpha= 0.5)
+#This faceted plot breaks down the body mass distribution by both species and sex:Gentoo penguins show the largest body mass overall, with males significantly heavier than females. Adelie and Chinstrap species show smaller body sizes, but the sex-based mass difference is still visible. This reinforces the finding that both species and sex influence body mass, and the interaction between them is critical to explore.
+
+
+penguins |>
+  filter(!is.na(sex)) |> # filter out non empty value from the data
+  ggplot(aes(x=species, fill=sex)) +
+  geom_bar(position= 'dodge') +
+  scale_fill_brewer(palette = "Set1", na.value ="grey50") +
+  labs(title="Number of individual penguins per sex and species where sex is known")
+# This bar plot helps assess class balance across the dataset:Adelie has the largest balanced sample size. Chinstrap has the fewest samples. Gentoo has moderate and fairly balanced counts. This is important when modeling to ensure fair training without introducing class imbalance bias.
+
+
+# boxplot beeswarm weight vs. species and sex
+penguins |>
+  filter(!is.na(sex)) |>
+ggplot(data=penguins, mapping=aes(x=species, y=body_mass_g,fill=sex))+
+  geom_boxplot(outlier.alpha=0)+
+  geom_beeswarm(cex = .9, alpha=.2, dodge.width= .75)
+# Males are consistently heavier than females within each species. Gentoo males reach the highest weights (~6000g), while Adelie females are the lightest. Beeswarm dots show some overlap, but the median and IQR clearly shift upward for males. This visual strongly supports the use of body mass in predictive models for sex.
+
+
+```
+
+Male penguins are consistently heavier than females across all species. Body mass is clearly separated by sex, especially in Gentoo and Adelie species. The dataset is relatively balanced in sample size per group, making it suitable for classification models. Visualizations suggest that **species and sex interact**, affecting physical measurements.
+
+These insights justify building predictive models based on body mass and other morphology features.
+
+## Descriptive Statistics & Normality Testing
+
+```{r}
+# Descriptive Statistics Table 
+desc_stats <- penguins |>
+  group_by(species, sex) |>
+  summarise(
+    across(
+      c(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g),
+      list(mean = ~round(mean(.x, na.rm = TRUE), 1),
+           sd = ~round(sd(.x, na.rm = TRUE), 1)),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  )
+
+#flextable::flextable(desc_stats)
+# This table summarizes the mean and standard deviation of key morphological features grouped by both species and sex. It allows us to compare traits across groups and confirm patterns of sexual dimorphism and species-based differences.
+
+
+# check the body mass with ks-test and shapiro for normalization group by species
+normality_summary <- penguins |> 
+  group_by(`species`) |>
+  summarize(p_KS = ksnormal(`body_mass_g`),
+            `pGauss (Shapiro)` = shapiro.test(`body_mass_g`)$p.value)
+
+
+# Identify numeric columns (both integers and doubles are considered numeric in R)
+numcols <-ColSeeker(data= penguins, namepattern = c("bill", "body", "flipper"))
+#numcols$index
+#head(numcols$names)
+#numcols$count
+
+# create a loop
+#res_table1 <- tibble(
+#  Variables=numcols$names,
+#  pKS=NA_real_,
+#  pSh=NA_real_)
+
+#for(var_i in seq_len(numcols$count)){
+#  res_table1$pKS[var_i] <-
+ #   ksnormal(penguins[[numcols$names[var_i]]])
+#  res_table1$pSh[var_i] <- 
+#    shapiro.test(penguins |> 
+#                   pull(numcols$names[var_i]))$p.value} 
+
+# Display the table
+#flextable(res_table1) |>
+#theme_zebra() |>
+#flextable::fontsize(size=7) |> 
+#  set_table_properties(width = 1,
+#                       layout = "autofit")
+
+# Grouped normality tests (Shapiro + Kolmogorov) for numeric variables
+#res_table2 <-
+   #pendata1 |> 
+ # filter(!is.na(sex)) |>
+ #group_by(species, sex) |>
+  #summarize(across(all_of(numcols$names),
+                  # .fns = list(
+                   #  pKS=~ksnormal(.x) |> 
+                    #   formatP(mark = TRUE),
+                    # pSh=~shapiro.test(.x) |> 
+                     #  pluck("p.value") |> 
+                     #  formatP(mark = TRUE))))
+# Display the table
+#flextable(res_table2) |>
+# theme_zebra() |>
+#flextable::fontsize(size=7) 
+
+
+# using pivot longer and wider
+res_table3 <-
+  penguins |> 
+  filter(!is.na(sex)) |>
+ group_by(species, sex) |>
+  summarize(across(all_of(numcols$names),
+                   .fns = list(
+                     pKS=~ksnormal(.x) |> 
+                       formatP(mark = TRUE),
+                     pSh=~shapiro.test(.x) |> 
+                       pluck("p.value") |> 
+                       formatP(mark = TRUE)))) |>
+   pivot_longer(cols=contains("_"),
+                names_to="Variable", 
+                values_to= "value") |> 
+     pivot_wider(names_from= c(species, sex),
+                values_from="value")
+
+
+# Display the table
+ flextable(res_table3) |>
+ separate_header() |> 
+theme_zebra() |>
+flextable::fontsize(size=7) 
+ 
+# Variable Class Identification (Feature Types)
+gaussvars <- ColSeeker(namepattern = "_",
+                       exclude = "bill")
+ordvars <- ColSeeker(namepattern = 'bill')
+factvars <- ColSeeker(namepattern = c("^s","is","year"))
+factvars <- ColSeeker(varclass = "factor")
+
+```
+
+The **most problematic variable** in terms of normality is `bill_length_mm` — especially in **Chinstrap females** and **Gentoo males**. These cases may **violate assumptions** in parametric methods like ANOVA or t-tests. Most `body_mass_g` and `flipper_length_mm` values are **safely within normal limits**, making them good candidates for Gaussian-based models.
+
+These steps are critical for ensuring valid, interpretable, and reproducible statistical analysis.
+
+## Group Comparison: Body Mass by Species (ANOVA + Post-Hoc)
+
+### Linear Model: Body Mass by Species
+
+```{r}
+# This model tests whether body mass differs significantly by species
+lm_out <- lm(body_mass_g~species, data=rawdata)
+anova_out <- anova(lm_out)
+# Post-hoc Pairwise t-tests (with FDR adjustment)
+# Performs pairwise comparisons between species levels for body mass
+posthoc <- 
+  pairwise.t.test(x = rawdata$body_mass_g,
+                  g = rawdata$species,
+                  p.adjust.method = "fdr") |> pluck("p.value") |> 
+  formatP(pretext = TRUE)
+
+ggplot(rawdata,aes(species, body_mass_g))+
+  geom_boxplot(outlier.alpha = 0)+
+  ggbeeswarm::geom_beeswarm(alpha=.1)+
+  geom_signif(comparisons = list(c(1,2),
+                                 c(1,3),
+                                 c(2,3)),
+              annotations = paste("p",
+                                  c(posthoc[1,1],
+                                    posthoc[2,1],
+                                    posthoc[2,2])),
+              step_increase = .15)+
+  scale_y_continuous(expand = expansion(mult = c(.1,.1)))+
+  labs(caption = 
+         paste0("p (anova) ",
+                formatP(anova_out$`Pr(>F)`[1],
+                        pretext = TRUE,mark = TRUE)))
+posthoc2 <- 
+  pairwise.t.test(x = rawdata$body_mass_g,
+                  g = rawdata$species,
+                  p.adjust.method = "fdr") |> pluck("p.value")
+ggplot(rawdata,aes(species, body_mass_g))+
+  geom_boxplot(outlier.alpha = 0)+
+  ggbeeswarm::geom_beeswarm(alpha=.1)+
+  geom_signif(comparisons = list(c(1,2),
+                                 c(1,3),
+                                 c(2,3)),
+              annotations = markSign(c(posthoc2[1,1],
+                                    posthoc2[2,1],
+                                    posthoc2[2,2])),
+              step_increase = .15)+
+  scale_y_continuous(expand = expansion(mult = c(.1,.1)))+
+  labs(caption = 
+         paste0("p (anova) ",
+                formatP(anova_out$`Pr(>F)`[1],
+                        pretext = TRUE,mark = TRUE)))
+
+```
+
+**ANOVA Result**: `p < 0.001` ⇒ There is a statistically significant difference in mean body mass across species. **Gentoo penguins** are significantly heavier than both Adelie and Chinstrap. **Adelie and Chinstrap (p = 0.691)** penguins do not differ significantly in body mass. This confirms species is a key predictor of body mass, especially due to the size of Gentoo.
+
+## Classification Tree Model: Predicting Penguin Sex
+
+```{r}
+rawdata <- penguins |>
+  filter(!is.na(sex)) |>
+  mutate(year=factor(year)) |> # Ensure 'year' is treated as categorical
+  mutate(body_mass_pnd = body_mass_g / 500) # Create simplified weight measure (penguin pounds)
+
+#cn(rawdata)
+
+### Regression tree
+
+regtree_out<-rpart(sex~species+bill_depth_mm+ island+
+                     bill_length_mm+flipper_length_mm+body_mass_pnd,
+                   minsplit=10,cp=.001, data=rawdata)
+rpart.plot(regtree_out,type = 2,tweak=2.0,
+           varlen=4,faclen=5,leaf.round=0)
+
+
+```
+
+The decision tree recursively splits based on morphological features (e.g., bill depth), creating branches that best separate male and female penguins. Each **leaf node** gives the predicted class (`male` or `feml`). Penguins with **shallower bills (\< 7.4 mm)** tend to be **female.** These go left to a predicted probability of **0.18 for male** (→ female dominant group). Penguins with **deeper bills (≥ 7.4 mm)** tend to be **male.** Right split has **0.67 male probability** (→ male dominant group)
+
+**Conclusion**: `bill_depth_mm` is the most discriminative feature.
+
+### Variable Importance Plot
+
+```{r}
+importance <- as_tibble(
+  regtree_out$variable.importance,
+  rownames='Predictor') %>%
+  dplyr::rename('Importance'=2) %>%
+  mutate(Predictor=fct_reorder(.f = Predictor,
+                               .x = Importance,.fun = min)) %>%
+  arrange(desc(Importance))
+importance %>%
+  ggplot(aes(Predictor,Importance))+
+  geom_col()+
+  coord_flip()
+```
+
+**Bill depth** and **body mass** are the top predictors for sex. `species` and `island` contribute very little to prediction. This aligns with EDA insights where size features showed strong separation between sexes.
+
+### ROC Curve + Youden Index
+
+```{r}
+
+#gg_rtree(regtree_out)
+# Get predicted probabilities for being male (pRT)
+rawdata$pRT <- predict(regtree_out)[,2]
+
+#pROC
+# Compute ROC and optimal threshold (Youden index)
+roc_out <- roc(
+  response=rawdata$sex,
+  predictor=rawdata$pRT
+)
+youden <- pROC::coords(roc_out,x='best',best.method='youden')
+youden
+# Plot ROC with Youden threshold point
+ggroc(roc_out,legacy.axes = T)+
+  geom_abline(slope = 1,intercept = 0)+
+  geom_point(x=1-youden$specificity,
+             y=youden$sensitivity,
+             color='red',
+             size=2
+  )
+
+```
+
+The ROC curve shows **high sensitivity and specificity**. Although the exact AUC value is not displayed, the ROC curve indicates near-perfect classification performance. The red dot shows the optimal cutoff (Youden’s J), balancing false positives and **false negatives to maximize overall classification accuracy**.
+
+```{r}
+ggplot(rawdata,aes(x=sex,y=pRT))+
+  geom_boxplot(coef=3)+
+  scale_y_continuous(breaks = seq(
+    from = 0,to = 1,by = .1))+
+  geom_hline(yintercept = c(.5,youden$threshold),
+             color=c('red',"blue"),
+             linetype=2)+
+  ggbeeswarm::geom_beeswarm()
+ggplot(rawdata,aes(sex,pRT,
+                   color=sex,shape=sex))+
+  geom_point(size=2)+
+  scale_color_manual(values = c('darkgreen','red'))+
+  scale_shape_manual(values = c(0,6))+
+  stat_summary(fun.data=mean_cl_boot)#+
+#geom_errorbarh(fun.data=mean_cl_boot)
+ggplot(rawdata,aes(x=sex,y=pRT))+
+  geom_violin()+
+  scale_y_continuous(breaks = seq(
+    from = 0,to = 1,by = .1))+
+  geom_hline(yintercept = .5,color='red')
+```
+
+The predicted probabilities (`pRT`) **separate cleanly by sex**. Most females are predicted close to 0, males near 1. The dotted red line at 0.5 shows the **default classification threshold**, while the blue line (Youden) could offer even better accuracy.
+
+## Logistic Regression: Predicting Penguin Sex
+
+```{r}
+# Logistic model to predict sex (binary outcome) using key features
+multivar_glm <- glm(sex ~ body_mass_pnd + flipper_length_mm + bill_length_mm + bill_depth_mm + species, family = binomial(), data = rawdata)
+
+# Summary of model coefficients
+# summary(multivar_glm)
+
+# Step 4: Type II ANOVA
+Anova_out <- car::Anova(multivar_glm, type = 2) |> 
+  broom::tidy() |>
+  mutate(p.value = formatP(p.value))
+
+# Step 5: Tidy model summary
+sum_out <- broom::tidy(multivar_glm) |> 
+  mutate(p.value = formatP(p.value))
+
+# Step 6: Odds Ratios and 95% CIs
+ORs <- exp(multivar_glm$coefficients)
+CIs <- exp(confint(multivar_glm))
+
+# Step 7: Create plot data for table
+OR_plotdata <- tibble(
+  Predictor = names(ORs)[-1] |>
+    str_to_title(),
+  OR = ORs[-1],
+  CI_low = CIs[-1, 1],
+  CI_high = CIs[-1, 2],
+  p = sum_out$p.value[-1],
+  Significance = markSign(p),
+  Label = paste(Predictor, Significance)
+)
+
+# Step 8: Display as a nicely formatted table
+OR_plotdata |> 
+  select(Label, OR, CI_low, CI_high) |> 
+  flextable() |>
+  set_table_properties(width = 1, layout = "autofit")
+
+#We used a logistic regression model to predict penguin sex based on physical measurements and species.
+# Coefficients were transformed into **odds ratios** for interpretability. The table shows how each predictor contributes to the likelihood of being male.
+#Confidence intervals and significance levels are included.
+
+# Odds ratio > 1 = higher odds of being male  
+# Odds ratio < 1 = higher odds of being female
+```
+
+**Body mass**, **bill length**, and especially **bill depth** are strong, significant predictors of sex. The **species variables** show extremely low odds for **Chinstrap and Gentoo** compared to the **Adelie** reference group — this may indicate interaction effects or data imbalance. **Flipper length** is not significant once other variables are included — possibly due to multicollinearity with body mass.
+
+```{r}
+ggplot(OR_plotdata, aes(x = reorder(Predictor, OR), y = OR)) +
+  geom_pointrange(aes(ymin = CI_low, ymax = CI_high), color = "black") +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  coord_flip() +
+  labs(title = "Odds Ratios from Logistic Regression",
+       y = "Odds Ratio", x = "Predictor")
+
+#Body_mass_pnd: Penguins with higher body mass are significantly more likely to be male. The OR is substantially above 1, and the confidence interval does not include 1. SpeciesChinstrap and SpeciesGentoo: Both species show odds ratios far below 1, with tight # confidence intervals. This suggests that, relative to the reference category (Adelie),  individuals from Chinstrap and Gentoo species have significantly lower odds of being male.
+```
