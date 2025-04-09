@@ -7,7 +7,7 @@ I'm a data analyst passionate about turning data into insights. This repository 
 
 ## 📁 Projects
 
-### 1. 🧹 [SQL Data Cleaning](./SQL_Data_Cleaning)
+### 1. [SQL Data Cleaning](./SQL_Data_Cleaning)
 
 **Dataset**: Layoffs.csv  
 Cleaned and standardized a messy dataset of global layoffs using SQL Server. Tasks included:
@@ -18,7 +18,7 @@ Cleaned and standardized a messy dataset of global layoffs using SQL Server. Tas
 
 ---
 
-### 2. 📊 [SQL Exploratory Data Analysis (EDA)](./SQL_EDA)
+### 2. [SQL Exploratory Data Analysis (EDA)](./SQL_EDA)
 
 **Dataset**: Layoffs.csv  
 Performed exploratory analysis on global layoffs to uncover trends by company, location, industry, and funding stage. Techniques used:
@@ -29,7 +29,7 @@ Performed exploratory analysis on global layoffs to uncover trends by company, l
 
 ---
 
-### 3. 📈 [Excel Dashboard – Bike Sales](./Excel_Project)
+### 3. [Excel Dashboard – Bike Sales](./Excel_Project)
 
 **Tool**: Microsoft Excel  
 Analyzed bike sales data and built a professional dashboard with:
@@ -39,14 +39,14 @@ Analyzed bike sales data and built a professional dashboard with:
 
 ---
 
-### 4. 📉 [Airbnb Tableau Dashboard](./Airbnb-Tableau-Project)
+### 4. [Airbnb Tableau Dashboard](./Airbnb-Tableau-Project)
 
 **Tool**: Tableau  
 Created an interactive dashboard using Seattle Airbnb listings to visualize:
-- 📍 Average prices by neighborhood & ZIP code
-- 👤 Superhost vs. non-superhost performance (ratings, price, reviews)
-- 🛏️ Room type vs. price vs. accommodates
-- 🗺️ Geographic price map and filters
+- Average prices by neighborhood & ZIP code
+- Superhost vs. non-superhost performance (ratings, price, reviews)
+- Room type vs. price vs. accommodates
+- Geographic price map and filters
 
 ---
 
