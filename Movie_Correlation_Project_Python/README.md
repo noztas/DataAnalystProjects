@@ -8,8 +8,7 @@ The dataset is sourced from [Kaggle](https://www.kaggle.com/datasets/danielgrija
 
 ## Objectives
 
-- Clean and preprocess the movie dataset
-- Encode categorical data for analysis
-- Compute correlation matrix for numeric features
-- Visualize feature correlations using heatmaps and regression plots
-- Identify which features are most strongly associated with box office revenue
+- Cleaned and prepared the dataset for analysis
+- Converted categorical features into a numeric format
+- Built a correlation matrix to detect strong relationships
+- Visualized key findings using regression plots and heatmaps
