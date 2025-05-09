@@ -12,3 +12,5 @@ The dataset is sourced from [Kaggle](https://www.kaggle.com/datasets/danielgrija
 - Converted categorical features into a numeric format
 - Built a correlation matrix to detect strong relationships
 - Visualized key findings using regression plots and heatmaps
+
+This was a great opportunity to combine **data wrangling, EDA, and storytelling**.
