@@ -1,7 +1,7 @@
 # Data Analyst Portfolio Projects
 
 Welcome to my portfolio!  
-I'm Neslihan, a data analyst passionate about turning data into insights. This repository showcases a collection of hands-on analytics projects using **SQL**, **Excel**, **Tableau**, and **Python**, covering data cleaning, exploration, visualization, and storytelling.
+I'm Neslihan, a data analyst passionate about turning data into insights. This repository showcases a collection of hands-on analytics projects using **MySQL**, **Excel**, **Tableau**, and **Python**, covering data cleaning, exploration, visualization, and storytelling.
 
 ---
 
@@ -18,7 +18,7 @@ Used SQL Server to clean a global layoffs dataset:
 📄 [`View SQL Script`](./SQL_Data_Cleaning)
 
 ### 2. SQL – Layoffs Exploratory Data Analysis (EDA)  
-**Tools**: SQL Server  
+**Tools**: MySQL   
 Uncovered insights on layoffs by company, region, industry:
 - Used CTEs, subqueries, window functions
 - Trend analysis by funding stage  
