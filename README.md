@@ -11,7 +11,7 @@ I'm Neslihan, a data analyst passionate about turning data into insights. This r
 
 ### 1. SQL – Layoffs Data Cleaning  
 **Dataset**: `Layoffs.csv`  
-Used SQL Server to clean a global layoffs dataset:
+Used MySQL to clean a global layoffs dataset:
 - Removed duplicates, nulls
 - Standardized string formats
 - Created clean output tables  
