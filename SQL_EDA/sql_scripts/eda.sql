@@ -1,22 +1,18 @@
 -- EDA
 
--- Here we are jsut going to explore the data and find trends or patterns or anything interesting like outliers
+-- Here is just going to explore the data and find trends or patterns or anything interesting like outliers
 
 -- normally when you start the EDA process you have some idea of what you're looking for
 
--- with this info we are just going to look around and see what we find!
+-- with this info I am just going to look around and see what we find!
 
 SELECT * 
 FROM world_layoffs.layoffs_staging2;
 
--- EASIER QUERIES
+
 
 SELECT MAX(total_laid_off)
 FROM world_layoffs.layoffs_staging2;
-
-
-
-
 
 
 -- Looking at Percentage to see how big these layoffs were
@@ -35,24 +31,9 @@ SELECT *
 FROM world_layoffs.layoffs_staging2
 WHERE  percentage_laid_off = 1
 ORDER BY funds_raised_millions DESC;
--- BritishVolt looks like an EV company, Quibi! I recognize that company - wow raised like 2 billion dollars and went under - ouch
+-- BritishVolt looks like an EV company, Quibi! I recognize that company - wow raised like 2 billion dollars and went under 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--- SOMEWHAT TOUGHER AND MOSTLY USING GROUP BY--------------------------------------------------------------------------------------------------
 
 -- Companies with the biggest single Layoff
 
@@ -103,14 +84,7 @@ GROUP BY stage
 ORDER BY 2 DESC;
 
 
-
-
-
-
--- TOUGHER QUERIES------------------------------------------------------------------------------------------------------------------------------------
-
--- Earlier we looked at Companies with the most Layoffs. Now let's look at that per year. It's a little more difficult.
--- I want to look at 
+-- Earlier I looked at Companies with the most Layoffs. Now look at that per year. 
 
 WITH Company_Year AS 
 (
@@ -127,8 +101,6 @@ FROM Company_Year_Rank
 WHERE ranking <= 3
 AND years IS NOT NULL
 ORDER BY years ASC, total_laid_off DESC;
-
-
 
 
 -- Rolling Total of Layoffs Per Month
@@ -148,54 +120,6 @@ ORDER BY dates ASC
 SELECT dates, SUM(total_laid_off) OVER (ORDER BY dates ASC) as rolling_total_layoffs
 FROM DATE_CTE
 ORDER BY dates ASC;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
