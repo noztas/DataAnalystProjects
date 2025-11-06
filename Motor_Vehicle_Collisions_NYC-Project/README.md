@@ -1,6 +1,6 @@
 # 🚦 NYC Motor Vehicle Collisions Analysis
 
-**Project Type:** Data Cleaning • Exploratory Data Analysis • Power BI Dashboard  
+*Project Type:* Data Cleaning • Exploratory Data Analysis • Power BI Dashboard  
 **Tools Used:** SQL • Power BI • Git  
 **Dataset Source:** [NYC Open Data – Motor Vehicle Collisions](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95)
 **Note:** The raw CSV file was not included due to GitHub's 100MB limit. You can download the dataset directly from the [NYC Open Data portal](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95).
