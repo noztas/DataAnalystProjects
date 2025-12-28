@@ -1,4 +1,4 @@
-United States Emissions Analysis Dashboard in Databricks
+Project: United States Emissions Analysis Dashboard in Databricks
 🔍 Overview:
 Designed and implemented a data analysis and visualization pipeline using Databricks SQL to examine greenhouse gas (GHG) emissions data across the United States, with a focus on population-adjusted emissions and state-by-state comparison. The data, sourced from the EPA (Environmental Protection Agency), reflects environmental trends relevant for policy-making, sustainability planning, and public awareness.
 ________________________________________
