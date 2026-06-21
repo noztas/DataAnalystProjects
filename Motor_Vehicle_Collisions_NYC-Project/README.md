@@ -1,84 +1,53 @@
-# 🚦 NYC Motor Vehicle Collisions Analysis
+# NYC Motor Vehicle Collisions Analysis
 
-*Project Type:* Data Cleaning • Exploratory Data Analysis • Power BI Dashboard  
-**Tools Used:** SQL • Power BI • Git  
-**Dataset Source:** [NYC Open Data – Motor Vehicle Collisions](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95)
-**Note:** The raw CSV file was not included due to GitHub's 100MB limit. You can download the dataset directly from the [NYC Open Data portal](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95).
----
+SQL cleaning plus a Power BI dashboard over NYC Open Data collision records, built to find where and why crashes turn serious and who gets hurt.
 
-## Project Overview
-
-This project analyzes traffic collision data in New York City to identify dangerous areas, contributing factors to crashes, and victim types most at risk. The dashboard and analysis were developed to support traffic safety planning by the NYC Department of Transportation.
+**Stack:** SQL (MySQL) · Power BI
+**Data:** [NYC Open Data - Motor Vehicle Collisions](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95). The raw CSV is not in the repo because it is over GitHub's 100 MB limit; download it from the portal.
 
 ---
 
-## Objectives
+## The question
 
-- Analyze trends in traffic crashes over time
-- Identify boroughs and streets with the highest crash severity
-- Determine top causes of accidents and injuries
-- Compare impact on pedestrians, cyclists, and motorists
-- Recommend data-driven improvements for road safety
+Where are collisions most severe, what is causing them, and who is most at risk? I wanted findings a city traffic-safety team could act on, not just crash counts.
 
----
+## Data preparation (SQL)
 
-## Data Preparation (MySQL)
+Starting from the raw NYC Open Data export, I:
 
-Key cleaning tasks:
-- Removed empty or duplicate records
-- Standardized vehicle type names (e.g., “Station Wagon/SUV” → “SUV”)
-- Converted date/time fields into analyzable formats
-- Combined contributing factor columns into a unified structure
+- removed empty and duplicate records
+- standardized vehicle type names (for example, "Station Wagon/SUV" to "SUV")
+- converted date and time fields into analyzable formats
+- merged the separate contributing-factor columns into one structure
 
-🔍 SQL scripts used:
-- `01_data_cleaning.sql`
-- `02_exploratory_analysis.sql`
+Scripts: `01_data_cleaning.sql`, `02_exploratory_analysis.sql`
 
----
+## Dashboard
 
-## 📊 Dashboard Features (Power BI)
+- **Executive summary:** total crashes, injuries, and fatalities, top contributing factors, year-over-year trend, and borough/year slicers
+- **Contributing factors:** behavioral vs environmental causes, broken down by borough
+- **Victim risk:** pedestrian, cyclist, and motorist injuries and fatalities by borough
+- **Vehicle types:** the most common vehicle types in crashes and how they relate to severity
 
-**1. Executive Summary Page**
-- Total crashes, injuries, fatalities (KPIs)
-- Top 5 contributing factors
-- Year-over-year trends
-- Borough and year slicers
+## What I found
 
-**2. Contributing Factors**
-- Comparison of behavioral vs environmental causes
-- Breakdown by borough
+- Brooklyn and Queens have the highest injury and fatality counts
+- Driver inattention and distraction is the single largest contributing factor
+- SUVs and trucks are linked to more severe injuries
+- Pedestrians and cyclists in Manhattan are at the highest relative risk
+- Speeding shows up most in Queens
 
-**3. Victim Risk Analysis**
-- Pedestrians, cyclists, motorists injuries/kills by borough
+## What I would recommend
 
-**4. Vehicle Types**
-- Common vehicle types in crashes
-- Vehicle types vs severity
+- Target speed enforcement in the highest-risk zones
+- Add protected bike lanes where cyclist injuries cluster
+- Run distracted-driving awareness campaigns
+- Improve signage and visibility at the worst intersections
 
 ---
 
-## 📈 Key Findings
+## About me
 
-- **Brooklyn & Queens** have the highest injury and fatality counts.
-- **Driver inattention/distraction** is the top contributing factor.
-- **SUVs and trucks** are linked to higher injury severity.
-- **Cyclists and pedestrians** in Manhattan are at higher risk.
-- Speeding is more common in **Queens**.
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
 
----
-
-## 📢 Recommendations
-
-- Increase speed enforcement in high-risk zones
-- Add protected bike lanes in high-cyclist areas
-- Launch distracted driving awareness campaigns
-- Improve signage and visibility at dangerous intersections
-
----
-
-## ✅ Outcome
-
-This project demonstrates advanced data wrangling and visualization skills using SQL and Power BI. It is now part of my portfolio to showcase end-to-end analytics workflows including:
-- Real-world dataset handling
-- Clean dashboard design
-- Insightful EDA & KPI storytelling
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
