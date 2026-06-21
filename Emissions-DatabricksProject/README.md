@@ -1,60 +1,43 @@
-#  Project: Emissions Analysis Dashboard in Databricks
+# US Emissions Analysis (Databricks SQL)
 
-##  Overview
-Designed and implemented a data analysis and visualization pipeline using **Databricks SQL** to examine greenhouse gas (GHG) emissions data across the United States, with a focus on population-adjusted emissions and state-by-state comparison.  
-The data, sourced from the **EPA (Environmental Protection Agency)**, reflects environmental trends relevant for:
-- Policy-making  
-- Sustainability planning  
-- Public awareness  
+A Databricks SQL dashboard over EPA greenhouse-gas data that compares US states on emissions, with the focus on per-capita figures rather than raw totals.
+
+**Stack:** Databricks SQL
+**Data:** EPA greenhouse gas emissions, at state and county level
 
 ---
 
-##  Project Purpose 
-Environmental data is increasingly critical for informing climate action.  
-This project aimed to:
-- Understand how emissions are distributed geographically  
-- Identify high-impact states and counties contributing most to national emissions  
-- Normalize emissions by population to spot inefficient areas  
-- Support data-driven decisions in climate policy and resource allocation  
+## The question
 
-> This analysis helps organizations or governments prioritize regions for emissions reduction, funding, or regulation.
+Ranking states by total emissions mostly rewards being large. I wanted to see who emits the most per person, which is a fairer basis for comparison, and where the two views disagree.
 
----
+## What I did
 
-## Technical Highlights
+In Databricks SQL I:
 
-### Calculations Performed:
-- Emissions per person for fairness across population sizes  
-- Total emissions by county and state  
-- Top 10 states contributing to national emissions  
-- Percentage share of those top 10 states in the national total  
+- aggregated total emissions by county and state
+- calculated emissions per person to compare areas of different sizes
+- identified the top 10 states by total emissions and their share of the national total
+- examined the relationship between population and per-capita emissions
 
-### Databricks Dashboard Visuals:
-- US map visual of emissions  
-- Pie chart for emission distribution  
-- Bar chart of top counties by CO₂e  
-- Scatter plot showing relationship between population and per-person emissions  
+## Dashboard
 
----
+- US map of emissions by state
+- Share of emissions across the top emitters
+- Top counties by CO2e
+- Scatter plot of population against per-capita emissions
 
-## Key Insights Gained
-- The top 10 states account for **over 50%** of total US emissions  
-- High population counties tend to have **lower per-capita emissions**, suggesting economies of scale or better infrastructure  
-- Texas (TX) and Florida (FL) are among the **top emitters**  
-- Some smaller counties showed **very high per-person emissions**, hinting at localized industrial activity or inefficiencies  
+## What I found
+
+- The top 10 states account for over half of total US emissions
+- Texas and Florida are among the largest total emitters
+- Densely populated counties tend to have lower per-capita emissions, which points to economies of scale
+- A few small counties have very high per-capita emissions, which usually signals concentrated industrial activity
 
 ---
 
-## Impact
-- Delivered **clear, interactive visuals** for stakeholders  
-- Highlighted **emission inequalities** between regions  
-- Showcased how cloud tools like **Databricks** enable scalable, real-time environmental data analysis  
+## About me
 
----
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
 
-## Skills Demonstrated
--  Cloud-based SQL development in Databricks  
--  Data cleaning, transformation, and aggregation  
--  Dashboard and visualization design  
--  Analytical storytelling using environmental datasets  
--  Insight extraction from complex, multi-column datasets  
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
