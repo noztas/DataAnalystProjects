@@ -1,79 +1,35 @@
-# 🚴‍♂️ Bike Sales Analysis - Excel Project  
+# Bike Sales Analysis (Excel)
 
-## 📌 Overview  
-This project analyzes **bike sales data** using **Excel** to understand purchasing behavior based on:  
-- **Income levels**  
-- **Commuting distance**  
-- **Age groups**  
+An Excel analysis of bike purchase data that looks at who buys bikes and why, built around pivot tables and an interactive dashboard.
 
-The analysis includes **pivot tables, charts, and an interactive dashboard** to uncover **sales trends, customer demographics, and seasonal demand fluctuations**. The goal is to provide **data-driven insights** that can help businesses **optimize inventory, refine marketing strategies, and identify target customer segments**.  
+**Tools:** Excel (Power Query, pivot tables, charts, conditional formatting), Excel functions (IF, VLOOKUP, COUNTIF, AVERAGEIF)
+**Data:** [Excel Project Dataset by AlexTheAnalyst](https://github.com/AlexTheAnalyst/Excel-Tutorial/blob/main/Excel%20Project%20Dataset.xlsx) - customer demographics, income, commute distance, and purchase decision
 
 ---
 
-## 📂 Dataset  
-- **File**: [`Bike_Sales_Analysis.xlsx`](./data/Bike_Sales_Analysis.xlsx)  
-- **Source**: [Excel Project Dataset by AlexTheAnalyst](https://github.com/AlexTheAnalyst/Excel-Tutorial/blob/main/Excel%20Project%20Dataset.xlsx)  
-- **Description**: The dataset includes customer demographics, income levels, commuting distances, and purchase decisions.  
+## What I did
+
+- Cleaned the raw data in Power Query: removed 26 duplicates (1,000 unique records left), filled missing Marital Status and Gender values, and standardized income formatting
+- Added an `Age Group` column (Young, Middle Age, Old) with nested IF logic
+- Built pivot tables summarizing purchases by income, age, commute distance, and gender
+- Assembled an interactive dashboard with slicers so the buyer profile can be filtered on the fly
+
+## What I found
+
+- Higher-income customers are more likely to buy a bike
+- Middle-aged customers are the most frequent buyers
+- Customers with longer commutes buy bikes more often
+- Purchases show clear seasonal peaks, which points to when to stock up
+
+## Files
+
+- [`data/Bike_Sales_Analysis.xlsx`](./data/Bike_Sales_Analysis.xlsx) - raw data, cleaning steps, pivot tables, charts, and the final dashboard
+- [`reports/Bike_Sales_Dashboard.png`](./reports/Bike_Sales_Dashboard.png) - dashboard screenshot
 
 ---
 
-## 📊 Key Insights  
-✔ **Higher-income customers are more likely to buy a bike.**  
-✔ **Middle-aged customers represent the most frequent buyers.**  
-✔ **Customers with longer commutes tend to purchase bikes.**  
-✔ **Seasonal trends show peak buying periods, which can help optimize inventory.**  
+## About me
 
----
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
 
-## 🔍 Data Cleaning & Preprocessing  
-Before conducting **exploratory data analysis (EDA)**, the dataset was cleaned and prepared for accurate insights:  
-✅ **Removed duplicate records** (26 duplicates removed, 1000 unique records remain).  
-✅ **Standardized categorical data** (completed missing text for Marital Status & Gender).  
-✅ **Converted numerical data** (adjusted Income values for consistency).  
-✅ **Created a new column** (`Age Group`) using **Nested IF functions** (categories: Young, Middle Age, Old).  
-
----
-
-## 📊 Excel Techniques Used  
-- **Pivot Tables** – Summarized sales data by **gender, age, income, and commute distance**.  
-- **Charts & Graphs** – Visualized sales trends, peak buying seasons, and customer preferences.  
-- **Slicers & Filters** – Created an interactive dashboard for deeper analysis.  
-- **Conditional Formatting** – Highlighted key trends in sales patterns.  
-
----
-
-## 📂 Project Files  
-- **[`data/Bike_Sales_Analysis.xlsx`](./data/Bike_Sales_Analysis.xlsx)** – 📊 **One file containing:**  
-  ✅ **Raw Data** (First Sheet)  
-  ✅ **Data Cleaning & Processing** (Second Sheet)  
-  ✅ **Pivot Tables** (Separate Sheets for Income, Age, Commute)  
-  ✅ **Charts & Visualizations** (Included in relevant sheets)  
-  ✅ **Final Dashboard** (Interactive sheet with slicers and graphs)  
-
-- **[`reports/Bike_Sales_Dashboard.png`](./reports/Bike_Sales_Dashboard.png)** – 📸 **Screenshot of the final dashboard**  
-
----
-
-## 📊 Key Visualizations in the Report  
-The dashboard contains **multiple insights into bike purchases**, including:  
-1️⃣ **Purchased Bikes by Income Level** – Analyzing whether higher earners buy more bikes.  
-2️⃣ **Purchased Bikes by Commuting Distance** – Examining how commute length influences purchases.  
-3️⃣ **Purchased Bikes by Age Group** – Identifying trends among different age categories.  
-
----
-
-## 🛠 Tools Used  
-- **Excel** – Data cleaning, Pivot Tables, Charts, Conditional Formatting  
-- **Power Query** – Data transformation and handling missing values  
-- **Excel Functions** – `IF`, `VLOOKUP`, `TEXT`, `COUNTIF`, `AVERAGEIF`  
-
-
-
-  
-
-
-
-
-
-
-
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
