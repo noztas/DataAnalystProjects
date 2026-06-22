@@ -1,14 +1,23 @@
-# Data Cleaning with Pandas
+# Customer Call List Cleaning (Python / pandas)
 
-This project demonstrates how to clean a real-world **customer call list dataset** using pandas. The goal is to make the data usable for analysis by removing noise, fixing formatting issues, and eliminating duplicates or invalid entries.
+A pandas script that cleans a messy customer call list into a usable contact sheet.
+
+**Tools:** Python, pandas, Jupyter
+**Data:** a sample customer call list (names, phone numbers, addresses, contact preferences)
 
 ---
 
-## Key Steps
-- Load Excel data from a local file
-- Remove duplicates and irrelevant columns
-- Clean string values (names, phone numbers)
-- Drop customers flagged as "Do Not Contact"
-- Handle missing or malformed data
+## What I did
 
-This was a great exercise in **real-world data wrangling**, where data isn't perfect, and every cleaning step counts.
+- Removed duplicate rows and columns that weren't needed
+- Standardized names and reformatted phone numbers into a consistent pattern
+- Dropped customers flagged "Do Not Contact" and those with no usable phone number
+- Cleaned missing and malformed values so the list could feed a call workflow
+
+---
+
+## About me
+
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
+
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
