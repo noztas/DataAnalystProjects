@@ -1,12 +1,23 @@
-# Exploratory Data Analysis: World Population
+# World Population EDA (Python)
 
-This notebook performs exploratory data analysis on world population data. It includes visualizations and statistical insights that help understand global and regional population trends.
+An exploratory analysis of world population data to see how populations are distributed and how they are trending.
+
+**Tools:** Python, pandas, matplotlib, seaborn, Jupyter
+**Data:** world population by country and region
 
 ---
 
-## Key Tasks
-- Load and preview the dataset
-- Summary statistics
-- Distribution and trend visualization
-- Region-based analysis
+## What I looked at
 
+- Summary statistics and the shape of the data
+- Population distribution and trends over time
+- Which countries and regions are growing fastest
+- Region-level comparisons
+
+---
+
+## About me
+
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
+
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
