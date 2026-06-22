@@ -1,19 +1,30 @@
-# 📊 SQL Exploratory Data Analysis (EDA) Project
+# SQL Exploratory Analysis - Layoffs Dataset
 
-## 📌 Overview
-This project explores the **Layoffs Dataset (2022)** using SQL queries to uncover key insights about layoffs across industries, countries, and companies.
+SQL queries that explore the cleaned 2022 tech-layoffs data to see who cut the most jobs and how layoffs moved over time.
 
-## 📂 Dataset - From Kaggle
-- **Source**: [Layoffs 2022 Dataset on Kaggle](https://www.kaggle.com/datasets/swaptr/layoffs-2022)
-- **Description**: This dataset tracks **tech layoffs from 2020-2022**, including company details, funding information, and industry trends.
+**Tools:** MySQL
+**Data:** [Layoffs 2022 on Kaggle](https://www.kaggle.com/datasets/swaptr/layoffs-2022)
 
-## 🔍 Key SQL Analysis Performed
-✔ **Total Layoffs Per Industry**  
-✔ **Top 5 Companies with the Most Layoffs**  
-✔ **Layoff Trends Over Time**  
-✔ **Layoff Percentage by Country**  
+---
 
-## 📂 Project Files
-- **[`sql_scripts/eda.sql`](./sql_scripts/eda.sql)** – SQL queries for EDA.
-- **[`data/layoffs_raw.csv`](./data/layoffs_raw.csv)** – Dataset.
+## What I looked at
 
+- total layoffs by industry
+- the five companies with the most layoffs
+- how layoffs trended over time
+- layoff share by country
+
+The queries build from simple aggregations up to rolling totals over time, so the analysis moves from "how many" to "when and where."
+
+## Files
+
+- [`sql_scripts/eda.sql`](./sql_scripts/eda.sql) - all EDA queries
+- [`data/layoffs_raw.csv`](./data/layoffs_raw.csv) - dataset
+
+---
+
+## About me
+
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
+
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
