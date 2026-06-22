@@ -1,108 +1,31 @@
 # Data Analyst Portfolio Projects
 
-Welcome to my portfolio!  
-I'm Neslihan, a data analyst passionate about turning data into insights. This repository showcases a collection of hands-on analytics projects using **MySQL**, **Excel**, **Tableau**, and **Python**, covering data cleaning, exploration, visualization, and storytelling.
+A collection of hands-on analytics projects across Power BI, Databricks SQL, Tableau, SQL, Excel, and Python, covering data cleaning, exploration, visualization, and dashboards. Each folder has its own README with the full write-up.
+
+## Dashboards and BI
+
+- [HR Attrition Dashboard (Power BI)](./PowerBI-HR_Analytics_Dashboard) - where employee turnover concentrates, by role, age, tenure, and pay, with reusable DAX measures
+- [NYC Motor Vehicle Collisions (SQL + Power BI)](./Motor_Vehicle_Collisions_NYC-Project) - where and why NYC crashes turn serious, built from raw open data
+- [Emissions Analysis (Databricks SQL)](./Emissions-DatabricksProject) - comparing US states on per-capita emissions, not just raw totals
+- [Airbnb Seattle (Tableau)](./Airbnb_Tableau_Project) - price by neighborhood and Superhost vs non-Superhost
+- [Bike Sales Dashboard (Excel)](./Excel_Project) - who buys bikes and why, with Power Query and pivot tables
+
+## SQL
+
+- [Layoffs Data Cleaning](./SQL_Data_Cleaning) - turning the raw 2022 tech-layoffs dataset into an analysis-ready table
+- [Layoffs EDA](./SQL_EDA) - aggregations, window functions, and rolling totals over time
+
+## Python
+
+- [Movie Correlation Analysis](./Movie_Correlation_Project_Python) - which factors line up with box-office earnings
+- [Customer Call List Cleaning](./Data_Wrangling_Python) - cleaning a messy contact list with pandas
+- [World Population EDA](./EDA_Python) - distribution and growth trends
+- [Book Data Web Scraping](./Web_Scraping_Python) - collecting book listings with BeautifulSoup
 
 ---
 
-## 📁 Projects
+## About me
 
-## SQL-Based Projects
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
 
-### 1. SQL – Layoffs Data Cleaning  
-**Dataset**: `Layoffs.csv`  
-Used MySQL to clean a global layoffs dataset:
-- Removed duplicates, nulls
-- Standardized string formats
-- Created clean output tables  
-📄 [`View SQL Script`](./SQL_Data_Cleaning)
-
-### 2. SQL – Layoffs Exploratory Data Analysis (EDA)  
-**Tools**: MySQL   
-Uncovered insights on layoffs by company, region, industry:
-- Used CTEs, subqueries, window functions
-- Trend analysis by funding stage  
-📄 [`View SQL Script`](./SQL_EDA)
-
-## Dashboarding Projects
-
-### 3. Excel Dashboard – Bike Sales  
-**Tool**: Microsoft Excel  
-Built an interactive dashboard using:
-- Pivot tables & slicers
-- Customer segment and sales insights  
-📄 [`View Excel`](./Excel_Project)
-
-### 4. Airbnb Tableau Dashboard  
-**Tool**: Tableau  
-Visualized Seattle Airbnb listings:
-- Price heatmaps by ZIP code
-- Host ratings vs. price and reviews
-- Interactive filters for users  
-📄 [`View on Tableau Public`](./Airbnb_Tableau_Project)
-
-## Python-Based Projects
-
-### 5. 🎬 Python – Movie Correlation Analysis  
-**Tools**: Jupyter Notebook, pandas, seaborn,   
-Analyzed [movie metadata from Kaggle](https://www.kaggle.com/datasets/danielgrijalvas/movies) to explore:
-- Which features (like budget, company, genre) correlate with gross earnings
-- Regression plots and heatmaps
-- Categorical encoding and feature engineering  
-📄 [`View project`](./Movie_Correlation_Project_Python)
-
-### 6. Python – Customer Call List Cleaning  
-**Tools**: Jupyter Notebook, pandas  
-Cleaned and transformed a messy Excel file using pandas:
-- Removed duplicates and irrelevant columns
-- Cleaned phone numbers and standardized formatting
-- Dropped "Do Not Contact" customers  
-📄 [`View project`](./Data_Wrangling_Python)
-
-### 7. Python – World Population EDA  
-**Tools**: Jupyter Notebook, pandas, matplotlib, seaborn  
-Performed exploratory analysis on world population trends:
-- Regional distribution
-- Top countries by growth
-- Time-based visualizations and statistical summaries  
-📄 [`View project`](./EDA_Python)
-
-### 8. Python – Book Data Web Scraping  
-**Tools**: Jupyter Notebook, requests, BeautifulSoup, pandas  
-Scraped book listings from [BooksToScrape.com](http://books.toscrape.com):
-- Collected titles, prices, and star ratings
-- Parsed HTML across multiple pages
-- Stored results in a pandas DataFrame  
-📄 [`View project`](./Web_Scraping_Python)
-
----
-
-## 🛠 Tools & Skills Demonstrated
-
-- **Python**: pandas, seaborn, matplotlib, BeautifulSoup, requests
-- **SQL**: cleaning, aggregations, joins, window functions
-- **Excel**: dashboarding, pivot tables, slicers
-- **Tableau**: geospatial and categorical dashboards
-- **Version Control**: Git & GitHub
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
