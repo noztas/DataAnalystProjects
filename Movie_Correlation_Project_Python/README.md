@@ -1,16 +1,28 @@
-# Movie Correlation Analysis with Python
+# Movie Correlation Analysis (Python)
 
-This project explores the relationships between a movie’s **budget**, **gross earnings**, and other features to identify which factors are most correlated with financial success.
+An analysis of 3,800+ movies that tests which factors line up with box-office earnings.
 
-The dataset is sourced from [Kaggle](https://www.kaggle.com/datasets/danielgrijalvas/movies) and includes metadata for over 3,800 movies such as budget, revenue, cast, director, genre, and more.
+**Tools:** Python, pandas, seaborn, matplotlib, Jupyter
+**Data:** [Movies dataset on Kaggle](https://www.kaggle.com/datasets/danielgrijalvas/movies) - budget, revenue, cast, director, genre, and more
 
 ---
 
-## Objectives
+## What I did
 
-- Cleaned and prepared the dataset for analysis
-- Converted categorical features into a numeric format
-- Built a correlation matrix to detect strong relationships
-- Visualized key findings using regression plots and heatmaps
+- Cleaned the data and handled missing values
+- Encoded categorical fields (company, genre) into numeric form
+- Built a correlation matrix and visualized it with a heatmap and regression plots
 
-This was a great opportunity to combine **data wrangling, EDA, and storytelling**.
+## What I found
+
+- Budget shows the strongest correlation with gross earnings
+- The number of votes (audience engagement) is the next strongest
+- Genre and production company have little correlation with earnings
+
+---
+
+## About me
+
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
+
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
