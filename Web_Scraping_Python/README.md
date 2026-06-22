@@ -1,19 +1,23 @@
-# Web Scraping Project
+# Book Data Web Scraping (Python)
 
-This project demonstrates how to scrape book data from a website using BeautifulSoup and requests. The scraped data includes book titles, prices, and ratings, and is saved into a structured DataFrame for future analysis.
+A scraper that collects book listings from a practice site and stores them as a clean dataset.
+
+**Tools:** Python, requests, BeautifulSoup, pandas, Jupyter
+**Source:** [Books to Scrape](http://books.toscrape.com/), a site built for scraping practice
 
 ---
 
-## Source Website
+## What I did
 
-This project scrapes book listings from [Books to Scrape](http://books.toscrape.com/), a public site made specifically for web scraping practice.
+- Sent HTTP requests with `requests` and parsed the HTML with `BeautifulSoup`
+- Looped across all catalogue pages to collect every listing
+- Extracted each book's title, price, and star rating
+- Stored the results in a pandas DataFrame ready for analysis
 
-- Homepage: http://books.toscrape.com/
-  
 ---
 
-## What It Covers
-- HTTP requests with `requests`
-- Parsing HTML with `BeautifulSoup`
-- Looping through multiple pages
-- Storing results in a pandas DataFrame
+## About me
+
+**Neslihan Oztas Ates** · Data Analyst · Ingolstadt, Germany
+
+[LinkedIn](https://www.linkedin.com/in/neslihanoztas/) · [Portfolio](https://noztas.github.io/Portfolio-Website/) · [GitHub](https://github.com/noztas/) · neslihanoztas1@gmail.com
